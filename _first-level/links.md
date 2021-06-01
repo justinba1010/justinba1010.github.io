@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Useful Links
+permalink: /links/
 ---
 
 ## References
