@@ -19,6 +19,9 @@ I think it's easier to do mostly videos and then if any topic interests you more
 
 # Week of October 10 2021
 
+## Main Quote
+* [Peter Watts](/christina/watts)
+
 ## October 10 2021
 * [What is Computation](https://www.youtube.com/watch?v=fjMU-km-Cso)
   * 6 min
@@ -34,3 +37,5 @@ I think it's easier to do mostly videos and then if any topic interests you more
 ## October 13 2021
 * [Fermi Paradox - The Great Filter Hypothesis](https://www.youtube.com/watch?v=UjtOGPJ0URM)
   * 9 min
+
+
