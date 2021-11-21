@@ -90,4 +90,6 @@ yellow4resize.jpg
 """
 x = x.split()
 for i in x:
+  if not i.endswith("html"):
+    continue
   print("<a href=\"%s\">%s</a><br>" % (i, i))
