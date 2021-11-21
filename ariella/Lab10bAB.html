@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 10B</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 10B, Oct 28, 2020-->
+        <style>
+            table{border-collapse: collapse;
+            border: 3px solid black}
+        </style>
+    </head>
+    <script language="javascript">
+        function changeImage(src) {
+            //console.log(src);
+            document.getElementById("bigimage").src = src;
+        }
+    </script>
+    <body>
+        <table>
+            <!-- 1st-->
+            <tr class="bottom"><th colspan="4">Yellowstone National Park</th></tr>
+            <!-- 2st-->
+            <tr><th colspan="4">Click any Image to Enlarge</th></tr>
+            <!-- 3rd-->
+            <tr>
+                <td>
+                    <img onclick="changeImage('yellow1.jpeg')" width="150px" height="150px" src="thumbnails/yellow1resize.jpg">
+                </td>
+                <td>
+                    <img onclick="changeImage('yellow2.jpeg')" width="150px" height="150px" src="thumbnails/yellow2rezise.jpg" alt="pic2">
+                </td>
+                <td>
+                    <img onclick="changeImage('yellow3.jpeg')" width="150px" height="150px" src="thumbnails/yellow3resize.jpg" alt="pic3">
+                </td>
+                <td>
+                    <img onclick="changeImage('yellow4.jpeg')" width="150px" height="150px" src="thumbnails/yellow4resize.jpg" alt="pic4">
+                </td>
+            </tr>
+            <!-- 4th-->
+            <tr>
+                <td rowspan="1"><img onclick="changeImage('geyser1.jpg')" src="thumbnails/geyser1resize.jpg" alt="geyser1" width="150px" height="150px"/></td>
+                <td colspan="2" rowspan="2"><img id="bigimage" src="oldfaithful.jpeg" alt="oldfaithful" width="300px" height="300px"/></td>
+                <td rowspan="1"><img onclick="changeImage('geyser2.jpg')" src="thumbnails/geyser2resize.jpg" alt="geyser2" width="150px" height="150px"/></td>
+            </tr>
+            <!-- 5th-->
+            <tr>
+                <td><img onclick="changeImage('pool1.jpg')" src="thumbnails/pool1resize.jpg" alt="pool1" width="150px" height="150px"/></td>
+                <td><img onclick="changeImage('pool2.jpg')" src="thumbnails/pool2resize.jpg" alt="pool2" width="150px" height="150px"/></td>
+            </tr>
+            <!-- 6th-->
+            <tr>
+                <th colspan="4">Yellow Stone National Park</th>
+            </tr>
+        </table>
+    </body>
+</html>

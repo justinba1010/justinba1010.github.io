@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 11B</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 11B, Nov 11, 2020-->
+    </head>
+    <body>
+        <table>
+            <th>Quiz Average</th>
+            <tr>
+                    <td><input id="quiz" type="number" value="0.0"></td>
+            </tr>
+            <th>Homework Average</th>
+            <tr>
+                    <td><input id="hw" type="number" value="0.0"></td>
+            </tr>
+            <th>Project Average</th>
+            <tr>
+                    <td><input id="proj" type="number" value="0.0"></td>
+            </tr>
+            <th>Lab Average</th>
+            <tr>
+                    <td><input id="lab" type="number" value="0.0"></td>
+            </tr>
+            <th>Overall Average</th>
+            <tr>
+                <td><input id="overall" type="number" value="0.0" readonly="true"></td>
+            </tr>
+            <th>Final Letter Grade</th>
+            <tr>
+                <td><input id="grade" type="text" value="F" readonly="true"></td>
+            </tr>
+            <tr>
+                <td><button onclick="calculate();">Calculate</button></td>
+            </tr>
+        </table>
+        <h2 id="hope">I hope I have a passing grade</h2>
+    </body>
+    <script>
+        function calculate() {
+            var quiz = document.getElementById("quiz").value;
+            var hw = document.getElementById("hw").value;
+            var proj = document.getElementById("proj").value;
+            var lab = document.getElementById("lab").value;
+            var overall = 0.3*quiz + 0.15*hw + 0.15*proj + 0.4*lab;
+            var grade = Math.round(overall);
+            document.getElementById("overall").value = grade;
+            var passing = "Yes I passed";
+            var letter;
+            if (overall > 90) {
+                letter = "A";
+                passing = "I got the A!";
+                document.body.style.background = "lightblue";
+            } else if (overall > 80) {
+                letter = "B";
+            } else if (overall > 70) {
+                letter = "C";
+            } else if (overall > 60) {
+                letter = "D";
+            } else {
+                passing = "I am going to summer school.";
+                letter = "F";
+            }
+            document.getElementById("grade").value = letter;
+            document.getElementById("hope").innerHTML = passing;
+        }
+    </script>
+
+</html>

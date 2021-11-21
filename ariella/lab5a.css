@@ -1,0 +1,23 @@
+body
+    {background-color: lightpink;}
+div
+    {height:"250px";
+    width:"300px";
+    font-size:26px;
+    background-color:70, 242, 234;
+    text-align:center;
+    transform:rotate(65deg);
+    text-shadow: 2px 2px 0px darkgrey;
+    border-style:dashed;
+    border-color:rgb(42, 185, 126);
+    border-width :6px;
+    }
+.div:hover{transform:rotate(45deg);
+    background-color: 242, 173, 70;
+    color: 255, 0, 149;
+    transform:rotate(-65deg);
+    border:6px double purple;
+    } 
+.div1:hover{transform:rotate(180deg);
+}
+

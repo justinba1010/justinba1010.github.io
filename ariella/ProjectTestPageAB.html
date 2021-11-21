@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Project Part 3</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Project Part 3, Oct 7, 2020-->
+           <link rel="stylesheet" href=A_Final_AB.css>
+    </head>
+    <body style="background-color: cadetblue;">
+      <script>
+        function closeNavigation() {
+          document.getElementById("navig").style.width = "0%";
+          document.getElementById("navig").style.display = "none";
+          document.getElementById("weather").style.width = "0%";
+          document.getElementById("weather").style.display = "none";
+        }
+        function openNavigation() {
+          document.getElementById("navig").style.width = "100%";
+          document.getElementById("navig").style.display = "block";
+          document.getElementById("weather").style.width = "100%";
+          document.getElementById("weather").style.display = "block";
+        }
+      </script>
+
+<div id="navig">
+  <div class="theLinks">
+      <a id="closing" onclick="closeNavigation()">Close</a>
+    <br><br><br><br><br>
+      <a href="AA_Page1_AB.html">1</a>
+      <a href="A_page2_AB.html">2</a>
+      <a href="A_page3_AB.html">3</a>
+  </div> 
+        <div id="weather">
+          Right now I went home to Florida and the weather here is a lot warmer than in SC. I have been sick lately so the warmth has been nice. The sky today was really clear and it surprisingly didn't rain.
+        </div>
+      </div>
+      <div>
+          <h3><span onclick="openNavigation()">MENU</span></h3>
+    
+      </div>
+    </body>
+
+</html>

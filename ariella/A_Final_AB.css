@@ -1,0 +1,13 @@
+body{color: black; background-color: lightgrey; font-size: large;}
+table{color:royalblue; text-align: center; border: 1px solid black; border-collapse: collapse; width:100%;}
+th{font-weight:bold; border: 1px solid black;border-collapse: collapse; padding:10px;}
+td{border: 1px solid black; border-collapse: collapse; padding:10px;}
+h2{color:red; text-align: center;}
+p{color:red;}
+h3{text-align: center;}
+#cited{color:black;}
+section, div{text-align: center;}
+#closing{position: absolute; right: 40pt;}
+.theLinks{position:relative; top:35%; width:100%; text-align: center;}
+.theLinks a {display:block; font-size: 25pt; font-weight: bold;}
+#navig{position:fixed; width:0; height:60%; z-index:1; overflow-x:hidden; background-color:pink; opacity: 0.6; transition: 3s;}  

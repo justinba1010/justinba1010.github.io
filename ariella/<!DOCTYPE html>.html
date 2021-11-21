@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 12</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 12, Nov 18, 2020-->
+        <style>
+            img{width:350px;
+            height:400px}
+        </style>
+        <script>
+            function slideRight(){
+                var savedSrcOfPic1 = document.getElementById('pic1').src;
+                document.getElementById('pic1').src=getElementById('pic2').src;
+                document.getElementById('pic2').src=getElementById('pic3').src;
+                document.getElementById('pic3').src=getElementById('pic4').src;
+                document.getElementById('pic4').src=savedSrcOfPic1;
+            }
+            function slideLeft(){
+                var savedSrcOfPic4 = document.getElementById('pic4').src;
+                document.getElementById('pic4').src=getElementById('pic3').src;
+                document.getElementById('pic3').src=getElementById('pic2').src;
+                document.getElementById('pic2').src=getElementById('pic1').src;
+                document.getElementById('pic1').src=savedSrcOfPic4
+            }
+            
+            var isAutoPlay = false;
+            function slideAuto(){
+                if(isAutoPlay)
+                {slideNext();
+                setTimeout(slideAuto, 2000);}
+            }
+        </script>
+            <script>
+                var bullet = "&bullet;";
+                var space = "&nbsp;"
+                var tab =  "&nbsp;&nbsp;&nbsp;&nbsp;";
+            </script>
+    </head>
+    <body>
+        <div style="text-align: center;">
+      <table >
+        <tr>
+            <td>
+                1
+            </td>
+            <td>
+                <img src="paint1.jpeg" alt="pic1" id="pic1">
+               
+            
+            </td>
+            <td>
+                3
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="paint2.jpeg" alt="pic2" id="pic2">
+            </td>
+            <td>
+                5
+            </td>
+            <td>
+                <img src="paint3.jpeg" alt="pic3" id="pic3">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                7
+            </td>
+            <td>
+                <img src="paint4.jpeg" alt="pic4" id="pic4">
+            </td>
+            <td>
+                9
+            </td>
+        </tr>
+      </table>
+    </div>
+    <br><br>
+    <button onclick="slideLeft();">prev</button>
+    <button onclick="slideRight();">next</button>
+    <button onclick="isAutoPlay=true; slideAuto()">autoplay</button>
+    <button onclick="isAutoPlay=false;">stop</button>
+      <!-- <ol type="i">
+            <li>Hi</li>
+            <ul>
+                <li>Hey</li>
+            </ul>
+            <li>ee</li>
+        </ol> -->
+    </body>
+
+</html>

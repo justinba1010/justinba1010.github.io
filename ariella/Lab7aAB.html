@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 7A</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 7, Oct 7, 2020-->
+        <style>
+            div{text-align:center;}
+            body{background-color: grey;}
+            h1{color:red;}
+            h2,h3,h4,h5,h6{color:blue;}
+            h4{text-decoration:underline;}
+        </style>
+    </head>
+    <body>
+       <h1 onmouseover="this.style.color='lime';" onmouseout="this.style.color='red';">Hello! This is me:)</h1>
+       <div onmouseover="this.style.textAlign='left';"><img src=”Lab7_Images/me.jpg” alt="me" height=”300px” width=”300px”></div>
+       <h3>And this</h3>
+       <h2 onclick="getElementById(heading6).style.fontSize='78pt'; style.color='teal';">is</h2>
+       <h4 onclick="this.innerHTML=style.color='purple';">my</h4>
+       <h6 id="heading6">web</h6>
+       <h5 onclick="document.body.style.backgroundColor='green'; alert('I can change the background color');">page!</h5>
+    </body>
+
+</html>

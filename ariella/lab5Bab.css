@@ -1,0 +1,25 @@
+h6{color:brown; text-decoration:underline;}
+body{background-image: url(https://www.google.com/imgres?imgurl=https%3A%2F%2Fassets.weforum.org%2Freport%2Fimage%2FknJgP4WBIFElZ-EYVat9EEXFh1pM1RoidLg5P-voSCs.png&imgrefurl=https%3A%2F%2Fwww.weforum.org%2Freports%2Fasean-youth-technology-skills-and-the-future-of-work&tbnid=-aDskNZufFK-DM&vet=12ahUKEwiOpLe14YnsAhWDC1MKHfEcC8IQMygKegUIARDFAQ..i&docid=pyywt73k9JNf7M&w=1938&h=1352&q=technology&safe=strict&ved=2ahUKEwiOpLe14YnsAhWDC1MKHfEcC8IQMygKegUIARDFAQ);
+    background-repeat: repeat
+}
+#name{font-size:36px;
+    background-color:77, 161, 158;
+    color:47, 48, 48;
+}
+p{font-size:14px;
+    background-color:171, 176, 176;
+    color:135, 35, 78;
+}
+#para1{font-weight:bold;
+    font-size:16px;
+    background-color:139, 217, 72;
+    color:37, 37, 230;
+}
+.class1{font-weight:normal;
+    font-size:16px;
+    background-color:239, 242, 153;
+    color:179, 51, 212;
+}
+h6{font-style: italic;}
+mark{color:darkred}
+.hover{font-size:40px;}

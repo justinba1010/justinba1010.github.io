@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 9B</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 9B, Oct 26, 2020-->
+        <style>
+            img{height:200px; width:200px;}
+        </style>
+        
+        <script>
+            function changePic(picID, newSrc){
+		    document.getElementById(picID).src=newSrc;}
+        </script>
+
+    </head>
+    <body>
+        <h2>Ariella Baum
+            Section 15
+            Oct 26
+        </h2>
+      <img src="Lab9Rollover_Images/hydflower.jpg" alt="hydrangea" id="hyd">
+      <img src="Lab9Rollover_Images/lily.jpg" alt="lily" 
+        onmouseover="this.src='Lab9Rollover_Images/hibiscus.jpeg'; document.getElementById(hyd).src='Lab9Rollover_Images/hibiscus.jpeg';">
+        <h2>Hello!</h2>
+       <img id="me" src=me.jpg alt="me"
+            onmouseover="changePic('me','Lab9Rollover_Images/cat.jpg'); changePic('cat','Lab9Rollover_Images/me.jpg');"
+            onmouseout="changePic('me','Lab9Rollover_Images/me.jpg'); changePic('cat', 'Lab9Rollover_Images/cat.jpeg');">
+       <img id="cat" src=cat.jpg alt="cat"
+       onmouseover="changePic('me','Lab9Rollover_Images/me.jpg'); changePic('cat', 'Lab9Rollover_Images/cat.jpeg');"
+     onmouseout="changePic('me','Lab9Rollover_Images/cat.jpg'); changePic('cat','Lab9Rollover_Images/me.jpg');">
+
+       
+       <div>
+        <img id="pic1" src="Lab9Rollover_Images/leaves.jpg" alt="leaves"
+        onmouseover="changePic('pic2','Lab9Rollover_Images/pumpkin.jpg');"
+        onmouseout="changePic('pic2','Lab9Rollover_Images/leaves.jpg');">
+        <img id="pic2" src="Lab9Rollover_Images/leaves.jpg" alt="leaves"
+        onmouseover="changePic('pic3', 'Lab9Rollover_Images/blcat.jpeg');"
+        onmouseout="changePic('pic3', 'Lab9Rollover_Images/leaves.jpg');">
+        <img id="pic3" src="Lab9Rollover_Images/leaves.jpg" alt="leaves"
+        onmouseover="changePic('pic1','Lab9Rollover_Images/cocky.jpg'); changePic('pic2','Lab9Rollover_Images/cocky.jpg'); changePic('pic3','Lab9Rollover_Images/cocky.jpg');"
+        onmouseout="changePic('pic1','Lab9Rollover_Images/me.jpg'); changePic('pic2','Lab9Rollover_Images/me.jpg'); changePic('pic3','Lab9Rollover_Images/me.jpg');">
+        <!--Pictures are of me-->
+        </div>
+
+    </body>
+
+</html>

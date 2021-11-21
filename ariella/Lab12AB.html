@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 12</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 12, Nov 18, 2020-->
+        <style>
+            img{width:350px;
+            height:400px}
+        </style>
+        <script>
+            function slideRight(){
+                var savedSrcOfPic1 = document.getElementById('pic1').src;
+                var savedSrcOfPic2 = document.getElementById('pic2').src;
+                var savedSrcOfPic3 = document.getElementById('pic3').src;
+                var savedSrcOfPic4 = document.getElementById('pic4').src;
+                document.getElementById('pic1').src = savedSrcOfPic2;
+                document.getElementById('pic2').src = savedSrcOfPic4;
+                document.getElementById('pic4').src = savedSrcOfPic3;
+                document.getElementById('pic3').src = savedSrcOfPic1;
+                
+            }
+        </script>
+    </head>
+    <body>
+        <div style="text-align: center;">
+      <table >
+        <tr>
+            <td></td>
+            <td>
+                <img src="paint1.jpg" alt="pic1" id="pic1" onclick="slideRight();">
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                <img src="paint2.jpg" alt="pic2" id="pic2" onclick="slideRight();">
+            </td>
+            <td></td>
+            <td>
+                <img src="paint3.jpg" alt="pic3" id="pic3" onclick="slideRight();">
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <img src="paint4.jpg" alt="pic4" id="pic4" onclick="slideRight();">
+            </td>
+            <td></td>
+        </tr>
+      </table>
+    </div>
+
+    </body>
+
+</html>

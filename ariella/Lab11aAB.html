@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lab 11A</title>
+        <meta charset="utf-8">
+        <!--Ariella Baum
+        Section 15, Avineet Kumar Singh
+        Lab 11A, Nov 4, 2020-->
+        <style>
+            body {
+                background: black;
+                color: orange;
+            }
+            button {
+                color: orange;
+            }
+        </style>
+    </head>
+    <body id="jack">
+        <div onclick="this.innerHTML=''; boo();" id="pumpkin1"><img src="halloween1.jpg" alt="hall1" height="400" width="400"></div>
+        <div onclick="this.innerHTML=''; boo();" id="pumpkin2">
+            <button onclick="orangeText(); blackBkg()">Button 1</button>
+            <button onclick="blackText(); orangeBkg()">Button 2</button>
+        </div>
+        <h1 id="ooh" onclick="changebody()">Happy Halloween!</h1>
+    </body>
+<script>
+    var originaljack = document.getElementById("jack").innerHTML;
+    function orangeText() {
+        document.body.style.color = "orange";
+    }
+    function blackText() {
+        document.body.style.color = "black";
+    }
+    function blackBkg() {
+        document.body.style.background = "black";
+    }
+    function orangeBkg() {
+        document.body.style.background = "orange";
+    }
+    function changebody() {
+        document.getElementById("jack").innerHTML = originaljack;
+    }
+    function boo() {
+        document.getElementById("ooh").innerHTML = "Oooooooooooooooooh";
+    }
+</script>
+</html>
