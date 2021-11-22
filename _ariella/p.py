@@ -17,9 +17,9 @@ coliseum.jpg
 elephant.jpg
 family.jpg
 geyser1.jpg
-geyser1resize.jpg
+geyser1.jpg
 geyser2.jpg
-geyser2resize.jpg
+geyser2.jpg
 grand2.jpg
 grand.jpg
 halloween1.jpg
@@ -61,16 +61,16 @@ life.jpg
 lily.jpg
 me.JPG
 oldfaithful.jpg
-oldfaithfulresize.jpg
+oldfaithful.jpg
 oldf.jpg
 paint1.jpg
 paint2.jpg
 paint3.jpg
 paint4.jpg
 pool1.jpg
-pool1resize.jpg
+pool1.jpg
 pool2.jpg
-pool2resize.jpg
+pool2.jpg
 pretty.jpg
 ProjectFallp1.html
 ProjectNavigation.html
@@ -80,13 +80,13 @@ schoolfriend.jpg
 usc.jpg
 vote.jpg
 yellow1.jpg
-yellow1resize.jpg
+yellow1.jpg
 yellow2.jpg
 yellow2rezise.jpg
 yellow3.jpg
-yellow3resize.jpg
+yellow3.jpg
 yellow4.jpg
-yellow4resize.jpg
+yellow4.jpg
 """
 x = x.split()
 for i in x:
