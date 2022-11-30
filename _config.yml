@@ -74,6 +74,10 @@ collections:
     path: _ariella
     output: true
     permalink: /ariella/:path
+  prisoners:
+    path: _prisoners
+    output: false
+    permalink: /prisoners/:path
 
 # The release of Jekyll Now that you're using
 version: v4.2.0
