@@ -1,7 +1,12 @@
 {
   "main.css": "/static/css/main.8d724459.chunk.css",
+<<<<<<< HEAD
   "main.js": "/static/js/main.9977e0e3.chunk.js",
   "main.js.map": "/static/js/main.9977e0e3.chunk.js.map",
+=======
+  "main.js": "/static/js/main.22f52e80.chunk.js",
+  "main.js.map": "/static/js/main.22f52e80.chunk.js.map",
+>>>>>>> f864ebf (Prisoners Game)
   "static/js/1.7483025c.chunk.js": "/static/js/1.7483025c.chunk.js",
   "static/js/1.7483025c.chunk.js.map": "/static/js/1.7483025c.chunk.js.map",
   "static/js/2.974a7755.chunk.js": "/static/js/2.974a7755.chunk.js",
@@ -10,6 +15,10 @@
   "runtime~main.js.map": "/static/js/runtime~main.f42220c5.js.map",
   "static/css/main.8d724459.chunk.css.map": "/static/css/main.8d724459.chunk.css.map",
   "index.html": "/index.html",
+<<<<<<< HEAD
   "precache-manifest.f165d10c55b025ab3fba1dea2dc81a9e.js": "/precache-manifest.f165d10c55b025ab3fba1dea2dc81a9e.js",
+=======
+  "precache-manifest.08485bc67cc036d38676c082a75ab6c1.js": "/precache-manifest.08485bc67cc036d38676c082a75ab6c1.js",
+>>>>>>> f864ebf (Prisoners Game)
   "service-worker.js": "/service-worker.js"
 }

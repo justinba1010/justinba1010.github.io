@@ -14,7 +14,11 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
+<<<<<<< HEAD
   "/precache-manifest.f165d10c55b025ab3fba1dea2dc81a9e.js"
+=======
+  "/precache-manifest.08485bc67cc036d38676c082a75ab6c1.js"
+>>>>>>> f864ebf (Prisoners Game)
 );
 
 workbox.clientsClaim();
