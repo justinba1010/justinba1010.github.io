@@ -8,9 +8,9 @@ permalink: /zodiac/
 |     Sign    |        Drink         |
 | --- | --- |
 |    Aries    |     Golden Dream     |
-|    Taurus   |       Bacardi        |
+|    Taurus   |   Bacardi Cocktail   |
 |    Gemini   |       Negroni        |
-|    Cancer   |         B 52         |
+|    Cancer   |        Paloma        |
 |     Leo     | Long Island Iced Tea |
 |    Virgo    |   Espresso Martini   |
 |    Libra    |     Grasshopper      |
@@ -46,7 +46,7 @@ permalink: /zodiac/
 |    Gemini   |  French Martini  |
 |    Cancer   |    Cuba Libre    |
 |     Leo     |     Negroni      |
-|    Virgo    |       B 52       |
+|    Virgo    |      Paloma      |
 |    Libra    | Sex On The Beach |
 |   Scorpio   |    Caipirinha    |
 | Sagittarius |   Irish Coffee   |
@@ -164,7 +164,7 @@ permalink: /zodiac/
 |    Taurus   | Russian Spring Punch |
 |    Gemini   |     Golden Dream     |
 |    Cancer   |      Angel Face      |
-|     Leo     |         B 52         |
+|     Leo     |        Paloma        |
 |    Virgo    |    Dirty Martini     |
 |    Libra    |       Vampiro        |
 |   Scorpio   |      Alexander       |
