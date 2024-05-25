@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Zodiac Drink Pic
+title: Drinks by Zodiac Sign
 permalink: /zodiac/
 ---
 ## 2024-05-25
