@@ -6,5 +6,4 @@ permalink: /about/
 
 ### Justin Baum
 
-* I am currently a Software Engineer at Vistar Media
-* I graduated from the University of South Carolina in May '21
+* I am a software engineer at [Yuzu Health](https://yuzu.health)
