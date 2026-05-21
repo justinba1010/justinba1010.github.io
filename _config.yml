@@ -74,6 +74,10 @@ collections:
     path: _ariella
     output: true
     permalink: /ariella/:path
+  auth:
+    path: _auth
+    output: true
+    permalink: /:collection/:path
   prisoners:
     path: _prisoners
     output: false
