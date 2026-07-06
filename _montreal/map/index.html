@@ -6,26 +6,38 @@
   html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .dot{display:inline-block;width:.85em;height:.85em;border-radius:50%;margin-right:.5em;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
   .line-swatch{display:inline-block;width:1.2em;height:.3em;background:#2563eb;margin-right:.5em;vertical-align:middle}
-  #map{position:absolute;inset:0}
-  .card{position:absolute;top:16px;left:16px;z-index:1000;background:rgba(255,255,255,.95);
+  #map{position:absolute;inset:0;background:#0d0f12}
+  /* "OpenStreetMap Dark": darken the base tile pane only. Radar, route, and
+     markers sit in separate panes, so their colors stay true. */
+  .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
+  .card{position:absolute;top:16px;left:16px;z-index:1000;
+    background:rgba(15,18,22,.82);color:#c7d2dc;border:1px solid rgba(255,255,255,.09);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
     font-size:clamp(13px,1.55vmin,30px);
-    padding:.9em 1.15em;border-radius:.55em;box-shadow:0 2px 12px rgba(0,0,0,.25);max-width:18em}
+    padding:.9em 1.15em;border-radius:.55em;box-shadow:0 4px 18px rgba(0,0,0,.5);max-width:18em}
   .card.right{left:auto;right:16px}
   /* Stacked cards in the top-right corner (legend + AI ride blurb). */
   .right-stack{position:absolute;top:16px;right:16px;z-index:1000;
     display:flex;flex-direction:column;gap:12px;align-items:flex-end;max-width:min(18em,44vw)}
   .right-stack .card{position:static;max-width:100%}
   .card.ride h1{font-size:1.15em;display:flex;align-items:center}
-  .ride-text{font-size:.95em;color:#333;line-height:1.45;font-style:italic}
-  .card h1{margin:0 0 .2em;font-size:1.55em;color:#1d3557}
-  .card .sub{font-size:.9em;color:#555;margin-bottom:.7em}
-  .card .legend{font-size:.85em;color:#333;line-height:1.7}
+  .ride-text{font-size:.95em;color:#aeb9c4;line-height:1.45;font-style:italic}
+  .card h1{margin:0 0 .2em;font-size:1.55em;color:#eaf2fb}
+  .card .sub{font-size:.9em;color:#8fa1b3;margin-bottom:.7em}
+  .card .legend{font-size:.85em;color:#c7d2dc;line-height:1.7}
   .card.live{top:auto;bottom:16px;left:16px;max-width:none;min-width:215px}
   .card.live h1{font-size:15px;margin:0 0 8px;display:flex;align-items:center}
   .live-dot{width:9px;height:9px;border-radius:50%;background:#999;margin-right:8px;
     box-shadow:0 0 0 3px rgba(153,153,153,.25);transition:background .3s}
-  .live-row{display:flex;justify-content:space-between;gap:20px;font-size:12px;padding:2px 0;color:#555}
-  .live-row b{color:#111;font-variant-numeric:tabular-nums}
+  .live-row{display:flex;justify-content:space-between;gap:20px;font-size:12px;padding:2px 0;color:#8fa1b3}
+  .live-row b{color:#f2f7fc;font-variant-numeric:tabular-nums}
+  /* Dark Leaflet controls (radar toggle, zoom, attribution). */
+  .leaflet-control-layers,.leaflet-bar a{background:rgba(15,18,22,.85);color:#c7d2dc;
+    border-color:rgba(255,255,255,.12)}
+  .leaflet-bar a{border-bottom:1px solid rgba(255,255,255,.12)}
+  .leaflet-bar a:hover{background:rgba(38,44,52,.95);color:#fff}
+  .leaflet-control-attribution{background:rgba(15,18,22,.7)!important;color:#8090a0!important}
+  .leaflet-control-attribution a{color:#a9bccd!important}
   .me-marker{overflow:visible}
   .me-motor{position:absolute;left:0;top:0;transform:translate(-50%,-50%);
     font-size:clamp(2.5rem,5vmin,8rem);line-height:1;text-align:center;
@@ -60,9 +72,13 @@
     zoomControl: true, attributionControl: true, preferCanvas: true
     
   });
+  // Standard OpenStreetMap tiles (full road/label detail), darkened via a CSS
+  // filter on the base tile pane (see .leaflet-tile-pane in <style>). Keeps all
+  // of OSM's detail but renders dark; radar/route/markers live in other panes,
+  // so the filter doesn't touch them. Free, no key.
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18, crossOrigin: true,
-    attribution: '&copy; OpenStreetMap contributors'
+    maxZoom: 19, crossOrigin: true, subdomains: 'abc',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
   const line = L.polyline(D.trkpts, { color:'#2563eb', weight:4, opacity:0.9 }).addTo(map);
   D.stops.forEach((w, i) => {
@@ -75,12 +91,12 @@
   });
   map.fitBounds(line.getBounds(), { padding: [34, 34] });
 
-  // ---- Live rain radar ----
-  // The radar frame index is cached & served by our own Lambda (which pulls
-  // RainViewer at most once per 5 min); we then load the tiles straight from
-  // RainViewer's tile cache. Refreshed every 5 min (radar cadence).
-  const WEATHER_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?weather=1';
-  const RIDE_URL    = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?ride=1';
+  // ---- Live rain radar (Iowa Environmental Mesonet / NWS NEXRAD) ----
+  // Plain XYZ tiles of the near-real-time NEXRAD composite — free, no key, and
+  // sharp up to ~z11 (unlike RainViewer's ~z7 cap), so it stays crisp on a 4K
+  // display without zooming out. US coverage only. Refreshed every 5 min.
+  const RIDE_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?ride=1';
+  const RADAR_TILES = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png';
   // Dedicated pane so radar sits above the base map tiles but below the route
   // line & markers, and never intercepts clicks.
   map.createPane('radar');
@@ -90,24 +106,15 @@
   L.control.layers(null, { '🌧️ Rain radar': rainLayers },
     { collapsed:false, position:'bottomright' }).addTo(map);
 
-  async function refreshRadar() {
-    try {
-      const r = await fetch(WEATHER_URL, { cache:'no-store' });
-      const j = await r.json();
-      const w = j.weather;
-      const frames = (w && w.frames) || [];
-      const frame = frames[frames.length - 1];            // latest available frame
-      if (!w || !frame) return;
-      // host + path + /size/z/x/y/color/options.png  (color 4 = universal blue, 1_1 = smooth+snow)
-      const url = w.host + frame.path + '/512/{z}/{x}/{y}/4/1_1.png';
-      // RainViewer's 512px radar tiles only carry real data up to z7; above that
-      // they're empty "unsupported" tiles, so cap maxZoom at 7 — Leaflet hides
-      // the radar layer entirely once you zoom in past it.
-      const layer = L.tileLayer(url, { opacity:0.35, maxZoom:7, pane:'radar',
-        attribution:'Radar &copy; <a href="https://rainviewer.com">RainViewer</a>' });
-      rainLayers.clearLayers();
-      rainLayers.addLayer(layer);
-    } catch (e) { /* leave previous frame in place on failure */ }
+  function refreshRadar() {
+    // NEXRAD updates ~every 5 min; the URL always points at the latest composite,
+    // so bump a 5-minute cache-buster to force fresh tiles. maxNativeZoom keeps it
+    // crisp to z11 and lets Leaflet gently upscale beyond that instead of erroring.
+    const url = RADAR_TILES + '?_=' + Math.floor(Date.now() / 300000);
+    const layer = L.tileLayer(url, { opacity:0.2, maxNativeZoom:11, maxZoom:18, pane:'radar',
+      attribution:'Radar &copy; <a href="https://mesonet.agron.iastate.edu/">Iowa Environmental Mesonet</a> / NWS NEXRAD' });
+    rainLayers.clearLayers();
+    rainLayers.addLayer(layer);
   }
   refreshRadar();
   setInterval(refreshRadar, 5 * 60 * 1000);
