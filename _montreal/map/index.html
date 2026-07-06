@@ -18,7 +18,9 @@
     box-shadow:0 0 0 3px rgba(153,153,153,.25);transition:background .3s}
   .live-row{display:flex;justify-content:space-between;gap:20px;font-size:12px;padding:2px 0;color:#555}
   .live-row b{color:#111;font-variant-numeric:tabular-nums}
-  .me-marker{font-size:46px;line-height:56px;text-align:center;
+  .me-marker{overflow:visible}
+  .me-motor{position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+    font-size:clamp(2.5rem,5vmin,8rem);line-height:1;text-align:center;
     filter:drop-shadow(0 1px 3px rgba(0,0,0,.55))}
 </style></head><body>
 <div class="card"><h1>Montreal</h1><div class="sub">445 mi · 716 km · 15 stops</div>
@@ -28,7 +30,7 @@
   <div><span class="dot" style="background:#e9c46a"></span>Stop</div>
   <div><span class="dot" style="background:#264653"></span>Finish · Montréal</div></div></div>
 <div class="card live" id="live-panel">
-  <h1><span class="live-dot" id="live-status"></span>🏍️ You</h1>
+  <h1><span class="live-dot" id="live-status"></span>🏍️ Justin</h1>
   <div class="live-row"><span>Position</span><b id="live-coords">—</b></div>
   <div class="live-row"><span>Speed</span><b id="live-speed">—</b></div>
   <div class="live-row"><span>Updated</span><b id="live-time">—</b></div>
@@ -58,9 +60,9 @@
   // ---- Live position (Overland → Lambda) ----
   const LIVE_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/';
   const DEVICE   = 'iphone';
-  const POLL_MS  = 60000;
+  const POLL_MS  = 5000;
 
-  const meIcon = L.divIcon({ className:'me-marker', html:'🏍️', iconSize:[56,56], iconAnchor:[28,28] });
+  const meIcon = L.divIcon({ className:'me-marker', html:'<span class="me-motor">🏍️</span>', iconSize:[0,0], iconAnchor:[0,0] });
   let meMarker = null;
   const $ = id => document.getElementById(id);
 
