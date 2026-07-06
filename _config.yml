@@ -82,6 +82,10 @@ collections:
     path: _prisoners
     output: false
     permalink: /prisoners/:path
+  montreal:
+    path: _montreal
+    output: false
+    permalink: /montreal/:path
 
 # The release of Jekyll Now that you're using
 version: v4.2.0
