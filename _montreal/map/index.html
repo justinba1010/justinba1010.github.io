@@ -4,14 +4,22 @@
 <title>Montreal — Route Map</title>
 <style>
   html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-  .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
-  .line-swatch{display:inline-block;width:16px;height:4px;background:#2563eb;margin-right:6px;vertical-align:middle}
+  .dot{display:inline-block;width:.85em;height:.85em;border-radius:50%;margin-right:.5em;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
+  .line-swatch{display:inline-block;width:1.2em;height:.3em;background:#2563eb;margin-right:.5em;vertical-align:middle}
   #map{position:absolute;inset:0}
   .card{position:absolute;top:16px;left:16px;z-index:1000;background:rgba(255,255,255,.95);
-    padding:14px 18px;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);max-width:280px}
-  .card h1{margin:0 0 4px;font-size:20px;color:#1d3557}
-  .card .sub{font-size:13px;color:#555;margin-bottom:10px}
-  .card .legend{font-size:12px;color:#333;line-height:1.7}
+    font-size:clamp(13px,1.55vmin,30px);
+    padding:.9em 1.15em;border-radius:.55em;box-shadow:0 2px 12px rgba(0,0,0,.25);max-width:18em}
+  .card.right{left:auto;right:16px}
+  /* Stacked cards in the top-right corner (legend + AI ride blurb). */
+  .right-stack{position:absolute;top:16px;right:16px;z-index:1000;
+    display:flex;flex-direction:column;gap:12px;align-items:flex-end;max-width:min(18em,44vw)}
+  .right-stack .card{position:static;max-width:100%}
+  .card.ride h1{font-size:1.15em;display:flex;align-items:center}
+  .ride-text{font-size:.95em;color:#333;line-height:1.45;font-style:italic}
+  .card h1{margin:0 0 .2em;font-size:1.55em;color:#1d3557}
+  .card .sub{font-size:.9em;color:#555;margin-bottom:.7em}
+  .card .legend{font-size:.85em;color:#333;line-height:1.7}
   .card.live{top:auto;bottom:16px;left:16px;max-width:none;min-width:215px}
   .card.live h1{font-size:15px;margin:0 0 8px;display:flex;align-items:center}
   .live-dot{width:9px;height:9px;border-radius:50%;background:#999;margin-right:8px;
@@ -23,16 +31,26 @@
     font-size:clamp(2.5rem,5vmin,8rem);line-height:1;text-align:center;
     filter:drop-shadow(0 1px 3px rgba(0,0,0,.55))}
 </style></head><body>
-<div class="card"><h1>Montreal</h1><div class="sub">445 mi · 716 km · 15 stops</div>
-  <div class="legend">
-  <div><span class="line-swatch"></span>Route</div>
-  <div><span class="dot" style="background:#2a9d8f"></span>Start · New York</div>
-  <div><span class="dot" style="background:#e9c46a"></span>Stop</div>
-  <div><span class="dot" style="background:#264653"></span>Finish · Montréal</div></div></div>
+<div class="right-stack">
+  <div class="card"><h1>Montreal</h1><div class="sub">445 mi · 716 km · 15 stops</div>
+    <div class="legend">
+    <div><span class="line-swatch"></span>Route</div>
+    <div><span class="dot" style="background:#2a9d8f"></span>Start · New York</div>
+    <div><span class="dot" style="background:#e9c46a"></span>Stop</div>
+    <div><span class="dot" style="background:#264653"></span>Finish · Montréal</div></div></div>
+  <div class="card ride" id="ride-card">
+    <h1>🏍️ Ride report</h1>
+    <div class="ride-text" id="ride-text">—</div>
+  </div>
+</div>
 <div class="card live" id="live-panel">
   <h1><span class="live-dot" id="live-status"></span>🏍️ Justin</h1>
   <div class="live-row"><span>Position</span><b id="live-coords">—</b></div>
   <div class="live-row"><span>Speed</span><b id="live-speed">—</b></div>
+  <div class="live-row"><span>Weather</span><b id="live-weather">—</b></div>
+  <div class="live-row"><span>Precip</span><b id="live-precip">—</b></div>
+  <div class="live-row"><span>Wind</span><b id="live-wind">—</b></div>
+  <div class="live-row"><span>Humidity</span><b id="live-humidity">—</b></div>
   <div class="live-row"><span>Updated</span><b id="live-time">—</b></div>
 </div>
 <div id="map"></div>
@@ -56,6 +74,91 @@
     mk.bindPopup('<b>' + w.name + '</b>');
   });
   map.fitBounds(line.getBounds(), { padding: [34, 34] });
+
+  // ---- Live rain radar ----
+  // The radar frame index is cached & served by our own Lambda (which pulls
+  // RainViewer at most once per 5 min); we then load the tiles straight from
+  // RainViewer's tile cache. Refreshed every 5 min (radar cadence).
+  const WEATHER_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?weather=1';
+  const RIDE_URL    = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?ride=1';
+  // Dedicated pane so radar sits above the base map tiles but below the route
+  // line & markers, and never intercepts clicks.
+  map.createPane('radar');
+  map.getPane('radar').style.zIndex = 350;
+  map.getPane('radar').style.pointerEvents = 'none';
+  const rainLayers = L.layerGroup().addTo(map);           // toggleable via layer control
+  L.control.layers(null, { '🌧️ Rain radar': rainLayers },
+    { collapsed:false, position:'bottomright' }).addTo(map);
+
+  async function refreshRadar() {
+    try {
+      const r = await fetch(WEATHER_URL, { cache:'no-store' });
+      const j = await r.json();
+      const w = j.weather;
+      const frames = (w && w.frames) || [];
+      const frame = frames[frames.length - 1];            // latest available frame
+      if (!w || !frame) return;
+      // host + path + /size/z/x/y/color/options.png  (color 4 = universal blue, 1_1 = smooth+snow)
+      const url = w.host + frame.path + '/512/{z}/{x}/{y}/4/1_1.png';
+      // RainViewer's 512px radar tiles only carry real data up to z7; above that
+      // they're empty "unsupported" tiles, so cap maxZoom at 7 — Leaflet hides
+      // the radar layer entirely once you zoom in past it.
+      const layer = L.tileLayer(url, { opacity:0.35, maxZoom:7, pane:'radar',
+        attribution:'Radar &copy; <a href="https://rainviewer.com">RainViewer</a>' });
+      rainLayers.clearLayers();
+      rainLayers.addLayer(layer);
+    } catch (e) { /* leave previous frame in place on failure */ }
+  }
+  refreshRadar();
+  setInterval(refreshRadar, 5 * 60 * 1000);
+
+  // ---- AI ride report (Bedrock, served & cached by our Lambda) ----
+  async function refreshRide() {
+    try {
+      const r = await fetch(RIDE_URL, { cache:'no-store' });
+      const j = await r.json();
+      if (j.ride) $('ride-text').textContent = j.ride;
+    } catch (e) { /* keep last blurb */ }
+  }
+  refreshRide();
+  setInterval(refreshRide, 5 * 60 * 1000);
+
+  // ---- Current weather at the live position (Open-Meteo, free / no key) ----
+  let lastWx = { lat:null, lon:null, at:0 };
+  async function refreshWeather(lat, lon) {
+    // Only refetch if we've moved ~1km or it's been >10 min.
+    const moved = lastWx.lat == null ||
+      Math.abs(lat - lastWx.lat) > 0.01 || Math.abs(lon - lastWx.lon) > 0.01;
+    if (!moved && (Date.now() - lastWx.at) < 10 * 60 * 1000) return;
+    try {
+      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+        '&current=temperature_2m,precipitation,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m' +
+        '&temperature_unit=celsius&wind_speed_unit=kmh';
+      const j = await (await fetch(u, { cache:'no-store' })).json();
+      const c = j.current || {};
+      const t = c.temperature_2m, p = c.precipitation, rh = c.relative_humidity_2m,
+            ws = c.wind_speed_10m, wd = c.wind_direction_10m;
+      const temp = t == null ? '—' : Math.round(t) + '°C · ' + Math.round(t*9/5+32) + '°F';
+      $('live-weather').textContent  = temp + ' ' + wxEmoji(c.weather_code);
+      $('live-precip').textContent   = p == null ? '—' : p + ' mm · ' + (p/25.4).toFixed(2) + ' in';
+      $('live-wind').textContent     = ws == null ? '—'
+        : Math.round(ws) + ' km/h · ' + Math.round(ws*0.621) + ' mph' + (wd == null ? '' : ' ' + compass(wd));
+      $('live-humidity').textContent = rh == null ? '—' : Math.round(rh) + '%';
+      lastWx = { lat, lon, at: Date.now() };
+    } catch (e) { /* keep last reading */ }
+  }
+  // Wind bearing (degrees the wind blows FROM) → 16-point compass + arrow.
+  const compass = deg => {
+    const pts = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    const arrows = ['↓','↙','↙','←','←','↖','↖','↑','↑','↗','↗','→','→','↘','↘','↓'];
+    const i = Math.round(deg / 22.5) % 16;
+    return pts[i] + ' ' + arrows[i];  // arrow points the way the wind is heading
+  };
+  // WMO weather-code → emoji (coarse buckets).
+  const wxEmoji = code => code == null ? '' :
+    code === 0 ? '☀️' : code <= 3 ? '⛅' : code <= 48 ? '🌫️' :
+    code <= 67 ? '🌧️' : code <= 77 ? '❄️' : code <= 82 ? '🌧️' :
+    code <= 86 ? '🌨️' : '⛈️';
 
   // ---- Live position (Overland → Lambda) ----
   const LIVE_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/';
@@ -90,6 +193,7 @@
         $('live-speed').textContent  = fmtSpeed(loc.speed);
         $('live-time').textContent   = fmtAgo(loc.timestamp);
         $('live-status').style.background = '#2a9d8f';
+        refreshWeather(loc.lat, loc.lon);
       } else {
         $('live-status').style.background = '#e9c46a';  // reachable but no data yet
       }
