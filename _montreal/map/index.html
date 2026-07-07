@@ -132,7 +132,7 @@
     }
   }
   map.setView([43.7, -73.9], 7);   // default view until the route loads
-  fetch('/map.json', { cache:'no-store' })
+  fetch('/montreal/map.json', { cache:'no-store' })
     .then(r => r.ok ? r.json() : Promise.reject(new Error('map.json not found')))
     .then(renderRoute)
     .catch(() => { document.getElementById('route-sub').textContent =
