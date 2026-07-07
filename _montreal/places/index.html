@@ -8,13 +8,22 @@
   #map{position:absolute;inset:0;background:#0d0f12}
   /* Darken only the base tile pane; markers/popups live in other panes. */
   .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
-  .card{position:absolute;top:16px;left:16px;z-index:1000;
+  .card{position:absolute;top:clamp(8px,2vw,16px);left:clamp(8px,2vw,16px);z-index:1000;
+    font-size:clamp(14px,3.6vw,16px);
     background:rgba(15,18,22,.86);color:#c7d2dc;border:1px solid rgba(255,255,255,.09);
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
     padding:.9em 1.15em;border-radius:.55em;box-shadow:0 4px 18px rgba(0,0,0,.5);
-    max-width:min(20em,80vw);max-height:calc(100vh - 32px);overflow:auto}
-  .card h1{margin:0 0 .15em;font-size:1.5em;color:#eaf2fb}
-  .card .sub{font-size:.9em;color:#8fa1b3;margin-bottom:.7em}
+    max-width:min(20em,80vw);max-height:calc(100vh - 2 * clamp(8px,2vw,16px));overflow:auto}
+  .card h1{margin:0;font-size:1.5em;color:#eaf2fb}
+  .card .sub{font-size:.9em;color:#8fa1b3;margin:.15em 0 0}
+  /* Collapsible panels (native <details>). */
+  .card summary{list-style:none;cursor:pointer;position:relative;padding-right:1.4em;outline:none}
+  .card summary::-webkit-details-marker{display:none}
+  .chev{position:absolute;top:0;right:0;color:#8fa1b3;font-size:1.15em;line-height:1;
+    transition:transform .2s}
+  .card[open] .chev{transform:rotate(180deg)}
+  .card[open] .sub{margin-bottom:.7em}
+  .card[open] .legend{margin-top:.55em}
   .rlist{list-style:none;margin:0;padding:0;font-size:.9em;line-height:1.5}
   .rlist li{padding:.32em 0;border-top:1px solid rgba(255,255,255,.07);cursor:pointer}
   .rlist li:first-child{border-top:none}
@@ -61,8 +70,8 @@
     color:#8fa1b3;font-weight:700;border-top:1px solid rgba(255,255,255,.12);padding-top:.6em}
   .sect:first-child{margin-top:.2em;border-top:none;padding-top:0}
   /* Legend card (bottom-left), styled like map.html's legend. */
-  .legend-card{top:auto;bottom:16px;left:auto;right:16px;max-width:none}
-  .legend-card h1{font-size:1.15em;margin:0 0 .35em}
+  .legend-card{top:auto;bottom:clamp(8px,2vw,16px);left:auto;right:clamp(8px,2vw,16px);max-width:min(16em,80vw)}
+  .legend-card h1{font-size:1.15em;margin:0}
   .legend-card .legend{font-size:.85em;color:#c7d2dc;line-height:1.75}
   .legend-card .dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;
     margin-right:.5em;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
@@ -71,22 +80,37 @@
     box-shadow:0 0 0 3px rgba(59,130,246,.35);animation:gpspulse 1.8s ease-out infinite}
   @keyframes gpspulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}
     70%{box-shadow:0 0 0 14px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+  /* Phones: full-width top panel, roomier tap targets, capped list height so the
+     header stays reachable and the map is never fully covered. */
+  @media (max-width:640px){
+    .panel{left:8px;right:8px;max-width:none}
+    .panel .rlist{max-height:48vh}
+    .rlist li{padding:.5em 0}
+    .legend-card{max-width:min(15em,66vw)}
+    .leaflet-popup-content{font-size:15px}
+  }
 </style></head><body>
-<div class="card">
-  <h1>Montreal</h1>
-  <div class="sub" id="count">— spots · click a marker for top dishes</div>
+<details class="card panel" id="panel">
+  <summary><h1>Montreal</h1><div class="sub" id="count">— spots · click a marker for top dishes</div><span class="chev">▾</span></summary>
   <ul class="rlist" id="list"></ul>
-</div>
-<div class="card legend-card">
-  <h1>Legend</h1>
+</details>
+<details class="card legend-card" id="legend">
+  <summary><h1>Legend</h1><span class="chev">▾</span></summary>
   <div class="legend markers">
     <div><span class="dot" style="background:#2a9d8f"></span>Home base (hostel)</div>
     <div><span class="dot" style="background:#111417"></span>Restaurants</div>
     <div><span class="dot" style="background:#8b5cf6"></span>Attractions</div>
     <div><span class="dot" style="background:#3b82f6"></span>You are here (GPS)</div>
   </div>
-</div>
+</details>
 <div id="map"></div>
+<script>
+// Panels open by default on desktop, collapsed on phones to free up the map.
+if (matchMedia('(min-width:641px)').matches) {
+  document.getElementById('panel').open = true;
+  document.getElementById('legend').open = true;
+}
+</script>
 <script>
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const gmapsUrl = (name, addr) =>
@@ -123,6 +147,7 @@ function render(data) {
   const HOSTEL = data.hostel;
   const RESTAURANTS = data.restaurants || [];
   const ATTRACTIONS = data.attractions || [];
+  const POPUP_MAX = Math.min(280, Math.round(window.innerWidth * 0.82));
 
   // Restaurants — numbered orange pins with a top-3-dishes popup.
   const markers = [];
@@ -137,7 +162,7 @@ function render(data) {
       '<ol>'+(r.dishes||[]).map(d=>'<li>'+esc(d)+'</li>').join('')+'</ol>'+
       '<div style="margin-top:.5em"><a href="'+esc(r.url)+'" target="_blank" rel="noopener" style="color:#e9a178;font-size:.85em">Website ↗</a></div>'+
       '</div>';
-    markers.push(L.marker([r.lat, r.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:280}));
+    markers.push(L.marker([r.lat, r.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:POPUP_MAX}));
   });
 
   // Hostel — distinct teal home marker, no dishes.
@@ -150,7 +175,7 @@ function render(data) {
     '<div><a href="'+esc(HOSTEL.url)+'" target="_blank" rel="noopener" style="color:#e9a178;font-size:.85em">Website ↗</a></div>'+
     '</div>';
   const hostelMarker = L.marker([HOSTEL.lat, HOSTEL.lon], {icon:hostelIcon, zIndexOffset:1000})
-    .addTo(map).bindPopup(hostelHtml, {maxWidth:280});
+    .addTo(map).bindPopup(hostelHtml, {maxWidth:POPUP_MAX});
 
   // Attractions — distinct purple pins with a themed emoji, no dishes.
   const attMarkers = [];
@@ -162,7 +187,7 @@ function render(data) {
       '<div class="pcat">'+esc(a.desc)+'</div>'+
       '<div class="paddr">📍 <a href="'+gmapsUrl(a.name, a.address)+'" target="_blank" rel="noopener">'+esc(a.address)+'</a></div>'+
       '</div>';
-    attMarkers.push(L.marker([a.lat, a.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:280}));
+    attMarkers.push(L.marker([a.lat, a.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:POPUP_MAX}));
   });
 
   // Map view — center & zoom from places.json (falls back to fit-all).
