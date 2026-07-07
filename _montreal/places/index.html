@@ -1,0 +1,215 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<title>Montreal</title>
+<style>
+  html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  #map{position:absolute;inset:0;background:#0d0f12}
+  /* Darken only the base tile pane; markers/popups live in other panes. */
+  .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
+  .card{position:absolute;top:16px;left:16px;z-index:1000;
+    background:rgba(15,18,22,.86);color:#c7d2dc;border:1px solid rgba(255,255,255,.09);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    padding:.9em 1.15em;border-radius:.55em;box-shadow:0 4px 18px rgba(0,0,0,.5);
+    max-width:min(20em,80vw);max-height:calc(100vh - 32px);overflow:auto}
+  .card h1{margin:0 0 .15em;font-size:1.5em;color:#eaf2fb}
+  .card .sub{font-size:.9em;color:#8fa1b3;margin-bottom:.7em}
+  .rlist{list-style:none;margin:0;padding:0;font-size:.9em;line-height:1.5}
+  .rlist li{padding:.32em 0;border-top:1px solid rgba(255,255,255,.07);cursor:pointer}
+  .rlist li:first-child{border-top:none}
+  .rlist li:hover,.rlist li.active{color:#fff}
+  .rlist .dot{display:inline-block;width:.7em;height:.7em;border-radius:50%;
+    margin-right:.55em;vertical-align:middle;background:#111417;
+    border:2px solid #fff;box-shadow:0 0 0 1px #999}
+  .rlist .rn{font-weight:600;color:#eaf2fb}
+  .rlist li:hover .rn,.rlist li.active .rn{color:#fff}
+  .rlist .cat{color:#8fa1b3;font-size:.86em}
+  /* Dark Leaflet controls & popups */
+  .leaflet-bar a{background:rgba(15,18,22,.85);color:#c7d2dc;border-color:rgba(255,255,255,.12)}
+  .leaflet-bar a:hover{background:rgba(38,44,52,.95);color:#fff}
+  .leaflet-control-attribution{background:rgba(15,18,22,.7)!important;color:#8090a0!important}
+  .leaflet-control-attribution a{color:#a9bccd!important}
+  .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:rgba(18,22,27,.97);color:#c7d2dc;
+    box-shadow:0 4px 20px rgba(0,0,0,.55)}
+  .leaflet-popup-content{margin:.85em 1em;font-size:14px;line-height:1.45}
+  .pop h2{margin:0 0 .1em;font-size:1.12em;color:#eaf2fb}
+  .pop .pcat{color:#8fa1b3;font-size:.85em;margin-bottom:.5em}
+  .pop .paddr{color:#9fb0c0;font-size:.85em;margin-bottom:.6em}
+  .pop .paddr a{color:#e9a178;text-decoration:none}
+  .pop .dlabel{color:#e76f51;font-weight:600;font-size:.8em;text-transform:uppercase;
+    letter-spacing:.04em;margin-bottom:.25em}
+  .pop ol{margin:0;padding-left:1.2em}
+  .pop ol li{padding:.1em 0;color:#dbe5ee}
+  .marker-num{display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    background:#111417;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.5)}
+  .marker-num span{transform:rotate(45deg);font-size:14px;line-height:1}
+  .marker-home{display:flex;align-items:center;justify-content:center;
+    width:30px;height:30px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    background:#2a9d8f;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.55)}
+  .marker-home span{transform:rotate(45deg);font-size:15px;line-height:1}
+  .rlist li.home .dot{background:#2a9d8f}
+  .rlist li.home .rn{color:#8fe3d6}
+  .marker-att{display:flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    background:#8b5cf6;border:2px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.5)}
+  .marker-att span{transform:rotate(45deg);font-size:14px;line-height:1}
+  .rlist li.att .dot{background:#8b5cf6}
+  .rlist li.att .rn{color:#c9b6f7}
+  .sect{margin:1em 0 .1em;font-size:.78em;text-transform:uppercase;letter-spacing:.06em;
+    color:#8fa1b3;font-weight:700;border-top:1px solid rgba(255,255,255,.12);padding-top:.6em}
+  .sect:first-child{margin-top:.2em;border-top:none;padding-top:0}
+  /* Legend card (bottom-left), styled like map.html's legend. */
+  .legend-card{top:auto;bottom:16px;left:auto;right:16px;max-width:none}
+  .legend-card h1{font-size:1.15em;margin:0 0 .35em}
+  .legend-card .legend{font-size:.85em;color:#c7d2dc;line-height:1.75}
+  .legend-card .dot{display:inline-block;width:.8em;height:.8em;border-radius:50%;
+    margin-right:.5em;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
+  /* Browser-GPS "you are here" marker — pulsing blue dot. */
+  .marker-gps{width:16px;height:16px;border-radius:50%;background:#3b82f6;border:2px solid #fff;
+    box-shadow:0 0 0 3px rgba(59,130,246,.35);animation:gpspulse 1.8s ease-out infinite}
+  @keyframes gpspulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}
+    70%{box-shadow:0 0 0 14px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+</style></head><body>
+<div class="card">
+  <h1>Montreal</h1>
+  <div class="sub" id="count">— spots · click a marker for top dishes</div>
+  <ul class="rlist" id="list"></ul>
+</div>
+<div class="card legend-card">
+  <h1>Legend</h1>
+  <div class="legend markers">
+    <div><span class="dot" style="background:#2a9d8f"></span>Home base (hostel)</div>
+    <div><span class="dot" style="background:#111417"></span>Restaurants</div>
+    <div><span class="dot" style="background:#8b5cf6"></span>Attractions</div>
+    <div><span class="dot" style="background:#3b82f6"></span>You are here (GPS)</div>
+  </div>
+</div>
+<div id="map"></div>
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const gmapsUrl = (name, addr) =>
+  'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' ' + addr);
+
+const map = L.map('map', {zoomControl:true, attributionControl:true});
+// ÖPNVKarte (memomaps) — OSM-based style that emphasizes public transport
+// (metro/bus/tram lines & stops). Free, no key. Darkened via the CSS filter on
+// .leaflet-tile-pane so it keeps the dark vibe.
+L.tileLayer('https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png', {
+  maxZoom:18,
+  attribution:'Map &copy; <a href="https://memomaps.de/">memomaps.de</a> (CC-BY-SA) · Data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+map.setView([45.51, -73.58], 12);   // default view until places.json loads
+
+// Grab the browser's current GPS position and plot it as a pulsing blue dot.
+// Requires a secure context (https:// or localhost); most browsers block
+// geolocation on file:// URLs, in which case this silently no-ops.
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lon = pos.coords.longitude, acc = pos.coords.accuracy;
+    const gicon = L.divIcon({className:'', html:'<div class="marker-gps"></div>',
+      iconSize:[16,16], iconAnchor:[8,8], popupAnchor:[0,-8]});
+    L.marker([lat, lon], {icon:gicon, zIndexOffset:2000}).addTo(map)
+      .bindPopup('<div class="pop"><h2>📍 You are here</h2>'+
+        '<div class="pcat">'+lat.toFixed(5)+', '+lon.toFixed(5)+' · ±'+Math.round(acc)+' m</div></div>');
+    L.circle([lat, lon], {radius:acc, color:'#3b82f6', weight:1, fillColor:'#3b82f6', fillOpacity:0.08}).addTo(map);
+  }, err => { console.warn('Geolocation unavailable:', err.message); },
+  {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
+}
+
+// ---- Everything below is populated from places.json ----
+function render(data) {
+  const HOSTEL = data.hostel;
+  const RESTAURANTS = data.restaurants || [];
+  const ATTRACTIONS = data.attractions || [];
+
+  // Restaurants — numbered orange pins with a top-3-dishes popup.
+  const markers = [];
+  RESTAURANTS.forEach((r, i) => {
+    const icon = L.divIcon({className:'', html:'<div class="marker-num"><span>'+(r.emoji||'🍽️')+'</span></div>',
+      iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-25]});
+    const html =
+      '<div class="pop"><h2>'+(r.emoji||'🍽️')+' '+esc(r.name)+'</h2>'+
+      '<div class="pcat">'+esc(r.cat)+'</div>'+
+      '<div class="paddr">📍 <a href="'+gmapsUrl(r.name, r.address)+'" target="_blank" rel="noopener">'+esc(r.address)+'</a></div>'+
+      '<div class="dlabel">Top 3 dishes</div>'+
+      '<ol>'+(r.dishes||[]).map(d=>'<li>'+esc(d)+'</li>').join('')+'</ol>'+
+      '<div style="margin-top:.5em"><a href="'+esc(r.url)+'" target="_blank" rel="noopener" style="color:#e9a178;font-size:.85em">Website ↗</a></div>'+
+      '</div>';
+    markers.push(L.marker([r.lat, r.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:280}));
+  });
+
+  // Hostel — distinct teal home marker, no dishes.
+  const hostelIcon = L.divIcon({className:'', html:'<div class="marker-home"><span>'+(HOSTEL.emoji||'🛏️')+'</span></div>',
+    iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-27]});
+  const hostelHtml =
+    '<div class="pop"><h2>'+esc(HOSTEL.name)+'</h2>'+
+    (HOSTEL.cat ? '<div class="pcat">'+esc(HOSTEL.cat)+'</div>' : '')+
+    '<div class="paddr">📍 <a href="'+gmapsUrl(HOSTEL.name, HOSTEL.address)+'" target="_blank" rel="noopener">'+esc(HOSTEL.address)+'</a></div>'+
+    '<div><a href="'+esc(HOSTEL.url)+'" target="_blank" rel="noopener" style="color:#e9a178;font-size:.85em">Website ↗</a></div>'+
+    '</div>';
+  const hostelMarker = L.marker([HOSTEL.lat, HOSTEL.lon], {icon:hostelIcon, zIndexOffset:1000})
+    .addTo(map).bindPopup(hostelHtml, {maxWidth:280});
+
+  // Attractions — distinct purple pins with a themed emoji, no dishes.
+  const attMarkers = [];
+  ATTRACTIONS.forEach((a) => {
+    const icon = L.divIcon({className:'', html:'<div class="marker-att"><span>'+a.emoji+'</span></div>',
+      iconSize:[28,28], iconAnchor:[14,28], popupAnchor:[0,-25]});
+    const html =
+      '<div class="pop"><h2>'+a.emoji+' '+esc(a.name)+'</h2>'+
+      '<div class="pcat">'+esc(a.desc)+'</div>'+
+      '<div class="paddr">📍 <a href="'+gmapsUrl(a.name, a.address)+'" target="_blank" rel="noopener">'+esc(a.address)+'</a></div>'+
+      '</div>';
+    attMarkers.push(L.marker([a.lat, a.lon], {icon}).addTo(map).bindPopup(html, {maxWidth:280}));
+  });
+
+  // Map view — center & zoom from places.json (falls back to fit-all).
+  const view = data.map;
+  if (view && view.center) map.setView(view.center, view.zoom != null ? view.zoom : 12);
+  else {
+    const bounds = L.latLngBounds([[HOSTEL.lat, HOSTEL.lon]]);
+    RESTAURANTS.forEach(r => bounds.extend([r.lat, r.lon]));
+    ATTRACTIONS.forEach(a => bounds.extend([a.lat, a.lon]));
+    map.fitBounds(bounds, {padding:[50,50]});
+  }
+
+  // Sidebar list — click to fly to a spot and open its popup.
+  const list = document.getElementById('list');
+  document.getElementById('count').textContent =
+    RESTAURANTS.length + ' restaurants · ' + ATTRACTIONS.length + ' attractions · click for details';
+
+  const clearActive = () => document.querySelectorAll('.rlist li').forEach(el=>el.classList.remove('active'));
+  const addSection = label => { const h = document.createElement('div'); h.className='sect'; h.textContent=label; list.appendChild(h); };
+  function addItem(cls, labelHtml, subText, marker, lat, lon){
+    const li = document.createElement('li');
+    li.className = cls;
+    li.innerHTML = '<span class="dot"></span><span class="rn">'+labelHtml+'</span>'+
+      (subText ? '<br><span class="cat" style="margin-left:1.25em">'+esc(subText)+'</span>' : '');
+    li.onclick = () => { map.setView([lat, lon], 15, {animate:true}); marker.openPopup(); clearActive(); li.classList.add('active'); };
+    list.appendChild(li);
+  }
+
+  addSection('Home base');
+  addItem('home', (HOSTEL.emoji||'🛏️')+' '+esc(HOSTEL.name), HOSTEL.address, hostelMarker, HOSTEL.lat, HOSTEL.lon);
+
+  addSection('Restaurants');
+  RESTAURANTS.forEach((r, i) =>
+    addItem('', (r.emoji||'🍽️')+' '+esc(r.name), r.cat, markers[i], r.lat, r.lon));
+
+  addSection('Attractions');
+  ATTRACTIONS.forEach((a, i) =>
+    addItem('att', a.emoji+' '+esc(a.name), a.desc, attMarkers[i], a.lat, a.lon));
+}
+
+fetch('montreal/places/places.json', {cache:'no-store'})
+  .then(r => r.ok ? r.json() : Promise.reject(new Error('places.json not found')))
+  .then(render)
+  .catch(err => {
+    document.getElementById('count').textContent =
+      'Could not load places.json — serve this folder over http (see console).';
+    console.error(err, '\nTip: browsers block fetch() on file:// URLs. Run "python3 -m http.server" and open via http://localhost:8000/restaurants.html');
+  });
+</script>
+</body></html>
