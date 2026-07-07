@@ -203,7 +203,7 @@ function render(data) {
     addItem('att', a.emoji+' '+esc(a.name), a.desc, attMarkers[i], a.lat, a.lon));
 }
 
-fetch('montreal/places/places.json', {cache:'no-store'})
+fetch('/montreal/places/places.json', {cache:'no-store'})
   .then(r => r.ok ? r.json() : Promise.reject(new Error('places.json not found')))
   .then(render)
   .catch(err => {
