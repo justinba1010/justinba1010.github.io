@@ -1,279 +1,264 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>NYC ⇄ Montréal Cue Sheet</title>
-  <style>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<title>Montreal — Route Map</title>
+<style>
+  html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .dot{display:inline-block;width:.85em;height:.85em;border-radius:50%;margin-right:.5em;vertical-align:middle;border:2px solid #fff;box-shadow:0 0 0 1px #999}
+  .line-swatch{display:inline-block;width:1.2em;height:.3em;background:#2563eb;margin-right:.5em;vertical-align:middle}
+  #map{position:absolute;inset:0;background:#0d0f12}
+  /* "OpenStreetMap Dark": darken the base tile pane only. Radar, route, and
+     markers sit in separate panes, so their colors stay true. */
+  .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
+  .card{position:absolute;top:16px;left:16px;z-index:1000;
+    background:rgba(15,18,22,.82);color:#c7d2dc;border:1px solid rgba(255,255,255,.09);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    font-size:clamp(13px,1.55vmin,30px);
+    padding:.9em 1.15em;border-radius:.55em;box-shadow:0 4px 18px rgba(0,0,0,.5);max-width:18em}
+  .card.right{left:auto;right:16px}
+  /* Stacked cards in the top-right corner (legend + AI ride blurb). */
+  .right-stack{position:absolute;top:16px;right:16px;z-index:1000;
+    display:flex;flex-direction:column;gap:12px;align-items:flex-end;max-width:min(18em,44vw)}
+  .right-stack .card{position:static;max-width:100%}
+  .card.ride h1{font-size:1.15em;display:flex;align-items:center}
+  .ride-text{font-size:.95em;color:#aeb9c4;line-height:1.45;font-style:italic}
+  .card h1{margin:0 0 .2em;font-size:1.55em;color:#eaf2fb}
+  .card .sub{font-size:.9em;color:#8fa1b3;margin-bottom:.7em}
+  .card .legend{font-size:.85em;color:#c7d2dc;line-height:1.7}
+  .card.live{top:auto;bottom:16px;left:16px;max-width:none;min-width:215px}
+  .card.live h1{font-size:15px;margin:0 0 8px;display:flex;align-items:center}
+  .live-dot{width:9px;height:9px;border-radius:50%;background:#999;margin-right:8px;
+    box-shadow:0 0 0 3px rgba(153,153,153,.25);transition:background .3s}
+  .live-row{display:flex;justify-content:space-between;gap:20px;font-size:12px;padding:2px 0;color:#8fa1b3}
+  .live-row b{color:#f2f7fc;font-variant-numeric:tabular-nums}
+  /* Dark Leaflet controls (radar toggle, zoom, attribution). */
+  .leaflet-control-layers,.leaflet-bar a{background:rgba(15,18,22,.85);color:#c7d2dc;
+    border-color:rgba(255,255,255,.12)}
+  .leaflet-bar a{border-bottom:1px solid rgba(255,255,255,.12)}
+  .leaflet-bar a:hover{background:rgba(38,44,52,.95);color:#fff}
+  .leaflet-control-attribution{background:rgba(15,18,22,.7)!important;color:#8090a0!important}
+  .leaflet-control-attribution a{color:#a9bccd!important}
+  .me-marker{overflow:visible}
+  .me-motor{position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+    font-size:clamp(2.5rem,5vmin,8rem);line-height:1;text-align:center;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.55))}
+</style></head><body>
+<div class="right-stack">
+  <div class="card"><h1 id="route-name">Route</h1>
+    <div class="sub" id="route-sub">Loading…</div>
+    <div class="legend">
+    <div><span class="line-swatch"></span>Route</div>
+    <div><span class="dot" style="background:#2a9d8f"></span>Start · <span id="legend-start">—</span></div>
+    <div><span class="dot" style="background:#e9c46a"></span>Stop</div>
+    <div><span class="dot" style="background:#264653"></span>Finish · <span id="legend-end">—</span></div></div></div>
+  <div class="card ride" id="ride-card">
+    <h1>🏍️ Ride report</h1>
+    <div class="ride-text" id="ride-text">—</div>
+  </div>
+</div>
+<div class="card live" id="live-panel">
+  <h1><span class="live-dot" id="live-status"></span>🏍️ Justin</h1>
+  <div class="live-row"><span>Position</span><b id="live-coords">—</b></div>
+  <div class="live-row"><span>Speed</span><b id="live-speed">—</b></div>
+  <div class="live-row"><span>Battery</span><b id="live-battery">—</b></div>
+  <div class="live-row"><span>Weather</span><b id="live-weather">—</b></div>
+  <div class="live-row"><span>Precip</span><b id="live-precip">—</b></div>
+  <div class="live-row"><span>Wind</span><b id="live-wind">—</b></div>
+  <div class="live-row"><span>Humidity</span><b id="live-humidity">—</b></div>
+  <div class="live-row"><span>Updated</span><b id="live-time">—</b></div>
+</div>
+<div id="map"></div>
+<script>
+  // ---- Route data (populated by renderRoute from map.json) ----
+  let D = null;
+  const hav = (a, b) => {                 // haversine distance in km
+    const R = 6371, r = Math.PI / 180;
+    const dLat = (b[0]-a[0])*r, dLon = (b[1]-a[1])*r, la1 = a[0]*r, la2 = b[0]*r;
+    const x = Math.sin(dLat/2)**2 + Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(x));
+  };
+  const routeKm = pts => { let k = 0; for (let i=1;i<pts.length;i++) k += hav(pts[i-1], pts[i]); return k; };
+  const map = L.map('map', {
+    zoomControl: true, attributionControl: true, preferCanvas: true
+    
+  });
+  // Standard OpenStreetMap tiles (full road/label detail), darkened via a CSS
+  // filter on the base tile pane (see .leaflet-tile-pane in <style>). Keeps all
+  // of OSM's detail but renders dark; radar/route/markers live in other panes,
+  // so the filter doesn't touch them. Free, no key.
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19, crossOrigin: true, subdomains: 'abc',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+  // ---- Route: fetched from map.json (generate it with gpx_to_json.py) ----
+  const routeLayer = L.layerGroup().addTo(map);
+  function renderRoute(data) {
+    D = data;
+    routeLayer.clearLayers();
+    let bounds = null;
+    if (D.trkpts && D.trkpts.length) {
+      const line = L.polyline(D.trkpts, { color:'#2563eb', weight:4, opacity:0.9 });
+      routeLayer.addLayer(line);
+      bounds = line.getBounds();
+    }
+    (D.stops || []).forEach((w, i) => {
+      const first = i === 0, last = i === D.stops.length - 1;
+      const color = first ? '#2a9d8f' : last ? '#264653' : '#e9c46a';
+      const mk = L.circleMarker([w.lat, w.lon], {
+        radius:(first||last)?9:5, color:'#fff', weight:2, fillColor:color, fillOpacity:1 });
+      mk.bindPopup('<b>' + (w.name || '') + '</b>');
+      routeLayer.addLayer(mk);
+      bounds = bounds ? bounds.extend([w.lat, w.lon]) : L.latLngBounds([[w.lat, w.lon]]);
+    });
+    const km = D.totalKm != null ? D.totalKm : routeKm(D.trkpts || []);
+    const mi = D.totalMi != null ? D.totalMi : km / 1.609344;
+    const $ = id => document.getElementById(id);
+    $('route-name').textContent = D.routeName || 'Route';
+    $('route-sub').textContent = (D.trkpts && D.trkpts.length)
+      ? Math.round(mi) + ' mi · ' + Math.round(km) + ' km · ' + Math.max((D.stops||[]).length - 1, 0) + ' stops'
+      : ((D.stops||[]).length + ' waypoints');
+    $('legend-start').textContent = (D.stops && D.stops[0] && D.stops[0].short) || '—';
+    $('legend-end').textContent   = (D.stops && D.stops.length) ? D.stops[D.stops.length-1].short : '—';
+    // Center on the midpoint between the two endpoints, zoomed to fit the route.
+    const ends = (D.stops && D.stops.length >= 2)
+      ? [[D.stops[0].lat, D.stops[0].lon], [D.stops[D.stops.length-1].lat, D.stops[D.stops.length-1].lon]]
+      : (D.trkpts && D.trkpts.length ? [D.trkpts[0], D.trkpts[D.trkpts.length-1]] : null);
+    if (ends) {
+      const mid = [(ends[0][0]+ends[1][0])/2, (ends[0][1]+ends[1][1])/2];
+      const z = (bounds && bounds.isValid()) ? map.getBoundsZoom(bounds, false, L.point(34, 34)) : 7;
+      map.setView(mid, z);
+    } else if (bounds && bounds.isValid()) {
+      map.fitBounds(bounds, { padding:[34, 34] });
+    }
+  }
+  map.setView([43.7, -73.9], 7);   // default view until the route loads
+  fetch('/map.json', { cache:'no-store' })
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('map.json not found')))
+    .then(renderRoute)
+    .catch(() => { document.getElementById('route-sub').textContent =
+      'No map.json — run: python3 gpx_to_json.py <route.gpx>'; });
 
-span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: min(4vw, 1.5em);}
-div.column{flex: auto; overflow-x: auto;}
-div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  // ---- Live rain radar (Iowa Environmental Mesonet / NWS NEXRAD) ----
+  // Plain XYZ tiles of the near-real-time NEXRAD composite — free, no key, and
+  // sharp up to ~z11 (unlike RainViewer's ~z7 cap), so it stays crisp on a 4K
+  // display without zooming out. US coverage only. Refreshed every 5 min.
+  const RIDE_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/?ride=1';
+  const RADAR_TILES = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png';
+  // Dedicated pane so radar sits above the base map tiles but below the route
+  // line & markers, and never intercepts clicks.
+  map.createPane('radar');
+  map.getPane('radar').style.zIndex = 350;
+  map.getPane('radar').style.pointerEvents = 'none';
+  const rainLayers = L.layerGroup().addTo(map);           // toggleable via layer control
+  L.control.layers(null, { '🌧️ Rain radar': rainLayers },
+    { collapsed:false, position:'bottomright' }).addTo(map);
 
-ul.task-list[class]{list-style: none;}
-ul.task-list li input[type="checkbox"] {
-font-size: inherit;
-width: 0.8em;
-margin: 0 0.8em 0.2em -1.6em;
-vertical-align: middle;
-}
-.display.math{display: block; text-align: center; margin: 0.5rem auto;}
-</style>
-  <style type="text/css">html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body {
-font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
-max-width: 820px; margin: 0 auto; padding: 24px 28px;
-color: #111; line-height: 1.35; font-size: 15px;
-}
-h1 { font-size: 26px; margin: 0 0 4px; border-bottom: 4px solid #c0392b; padding-bottom: 8px; }
-h2 { font-size: 20px; margin: 22px 0 8px; padding: 6px 10px; border-radius: 6px; color: #fff; }
-h2:nth-of-type(1) { background: #e67e22; } 
-h2:nth-of-type(2) { background: #34495e; } 
-h3 { font-size: 15px; margin: 16px 0 4px; color: #c0392b; text-transform: uppercase; letter-spacing: .5px; }
-table { border-collapse: collapse; width: 100%; margin: 6px 0 4px; font-size: 14px; }
-th { background: #2c3e50; color: #fff; text-align: left; padding: 6px 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .3px; }
-td { padding: 6px 8px; border-bottom: 1px solid #ddd; }
-tr:nth-child(even) td { background: #f6f7f9; }
+  function refreshRadar() {
+    // NEXRAD updates ~every 5 min; the URL always points at the latest composite,
+    // so bump a 5-minute cache-buster to force fresh tiles. maxNativeZoom keeps it
+    // crisp to z11 and lets Leaflet gently upscale beyond that instead of erroring.
+    const url = RADAR_TILES + '?_=' + Math.floor(Date.now() / 300000);
+    const layer = L.tileLayer(url, { opacity:0.2, maxNativeZoom:11, maxZoom:18, pane:'radar',
+      attribution:'Radar &copy; <a href="https://mesonet.agron.iastate.edu/">Iowa Environmental Mesonet</a> / NWS NEXRAD' });
+    rainLayers.clearLayers();
+    rainLayers.addLayer(layer);
+  }
+  refreshRadar();
+  setInterval(refreshRadar, 5 * 60 * 1000);
 
-td strong { font-weight: 700; }
-tr:has(td strong) td { background: #fdf3e7; }
-code { background: #eee; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
-hr { border: none; border-top: 2px solid #ddd; margin: 20px 0; }
-p { margin: 6px 0; }
-em { color: #555; }
-@media print {
-body { padding: 0; font-size: 12.5px; max-width: none; }
-h2 { page-break-after: avoid; }
-table { page-break-inside: avoid; }
-h1 { page-break-after: avoid; }
-}
-</style>
-</head>
-<body>
-<header id="title-block-header">
-<h1 class="title">NYC ⇄ Montréal Cue Sheet</h1>
-</header>
-<a href="/montreal/map"><h1 id="nyc-montréal-tank-bag-cue-sheet">🏍️ NYC ⇄ Montréal — Tank-Bag Cue Sheet (Click Here)</h1></a>
-<p>Route: REVER “Montreal” · 444 mi each way · sunset ~8:40 PM Rule of
-thumb: if you’re <strong>behind the “roll by” time, skip the next
-non-fuel stop.</strong></p>
-<hr />
-<h2 id="day-1-nyc-montréal-depart-530-am">☀️ DAY 1 — NYC → MONTRÉAL
-(depart 5:30 AM)</h2>
-<table>
-<thead>
-<tr>
-<th>✔</th>
-<th>Reach</th>
-<th>Clock</th>
-<th>Mile</th>
-<th>Fuel</th>
-<th>Stop</th>
-<th>Roll by</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>☐</td>
-<td><strong>LEAVE NYC</strong></td>
-<td>5:30a</td>
-<td>0</td>
-<td>full</td>
-<td>—</td>
-<td>5:30a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Bear Mountain</td>
-<td>6:58a</td>
-<td>59</td>
-<td></td>
-<td>📸 15m</td>
-<td>7:15a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Gas — Rt 22</td>
-<td>8:45a</td>
-<td>130</td>
-<td>⛽#1</td>
-<td>15m</td>
-<td>9:00a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Mt Greylock summit</td>
-<td>11:10a</td>
-<td>184</td>
-<td></td>
-<td>📸 15m</td>
-<td>11:25a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td><strong>Lake George</strong></td>
-<td>1:30p</td>
-<td>294</td>
-<td>⛽#2</td>
-<td>🍔 lunch+📸 60m</td>
-<td>2:30p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Ticonderoga</td>
-<td>3:06p</td>
-<td>316</td>
-<td></td>
-<td>thru</td>
-<td>—</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Gas — pre-border</td>
-<td>5:07p</td>
-<td>414</td>
-<td>⛽#3</td>
-<td>15m</td>
-<td>5:25p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>🛂 Border (N-bound)</td>
-<td>5:22p</td>
-<td>414</td>
-<td></td>
-<td>~30m</td>
-<td>6:00p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td><strong>MONTRÉAL</strong></td>
-<td>6:25p</td>
-<td>444</td>
-<td></td>
-<td>🎉</td>
-<td>—</td>
-</tr>
-</tbody>
-</table>
-<p>Moving 10.4h + stops 2.5h = <strong>12.9h</strong> · buffer to dark
-<strong>~2.3h</strong></p>
-<hr />
-<h2 id="day-2-montréal-nyc-depart-530-am">🌆 DAY 2 — MONTRÉAL → NYC
-(depart 5:30 AM)</h2>
-<table>
-<thead>
-<tr>
-<th>✔</th>
-<th>Reach</th>
-<th>Clock</th>
-<th>Mile</th>
-<th>Fuel</th>
-<th>Stop</th>
-<th>Roll by</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>☐</td>
-<td><strong>LEAVE MONTRÉAL</strong></td>
-<td>5:30a</td>
-<td>0</td>
-<td>full</td>
-<td>—</td>
-<td>5:30a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>🛂 Border (S-bound)</td>
-<td>6:03a</td>
-<td>30</td>
-<td></td>
-<td>~45m ⚠️slow dir</td>
-<td>6:50a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Ticonderoga village</td>
-<td>8:49a</td>
-<td>128</td>
-<td></td>
-<td>📸 15m</td>
-<td>9:05a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Lake George</td>
-<td>9:39a</td>
-<td>150</td>
-<td>⛽#1</td>
-<td>stretch 15m</td>
-<td>9:55a</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Cambridge NY</td>
-<td>11:40a</td>
-<td>213</td>
-<td></td>
-<td>🍔 lunch 30m</td>
-<td>12:10p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Petersburgh</td>
-<td>12:45p</td>
-<td>240</td>
-<td>⛽#2</td>
-<td>15m</td>
-<td>1:00p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Petersburgh Pass</td>
-<td>1:53p</td>
-<td>260</td>
-<td></td>
-<td>📸 15m</td>
-<td>2:10p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td>Gas — Bear Mtn</td>
-<td>5:00p</td>
-<td>385</td>
-<td>⛽#3</td>
-<td>15m</td>
-<td>5:15p</td>
-</tr>
-<tr>
-<td>☐</td>
-<td><strong>NEW YORK CITY</strong></td>
-<td>7:04p</td>
-<td>444</td>
-<td></td>
-<td>🎉</td>
-<td>—</td>
-</tr>
-</tbody>
-</table>
-<p>Moving 10.8h + stops 2.8h = <strong>13.6h</strong> · buffer to dark
-<strong>~1.6h</strong></p>
-<p>Optional detours (add to the day, ~2 mi off route each): • Ausable
-Chasm (near border) +15m • Fort Ticonderoga (spur S of village) +15m</p>
-<hr />
-<h3 id="pre-flight-night-before">Pre-flight (night before)</h3>
-<p>☐ Full tank ☐ Passport/enhanced ID ☐ Phone + backup nav ☐ Rain layer
-☐ Alarm 4:45a ☐ Greylock summit rd open (seasonal, late May–mid Oct ✅
-July)</p>
-<h3 id="border-notes">Border notes</h3>
-<p>• N-bound (Day 1) = faster; S-bound (Day 2) = slower screening, but 6
-AM beats the backups. • Avoid a Sunday-afternoon southbound crossing —
-that’s the worst-case wait.</p>
-<hr />
-<h3 id="ireland-trip-2025">Ireland Trip 2025</h3>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/pkdYzAGWNO4?si=wZvtysN-ZQ4fQeB4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-</body>
-</html>
+  // ---- AI ride report (Bedrock, served & cached by our Lambda) ----
+  async function refreshRide() {
+    try {
+      const r = await fetch(RIDE_URL, { cache:'no-store' });
+      const j = await r.json();
+      if (j.ride) $('ride-text').textContent = j.ride;
+    } catch (e) { /* keep last blurb */ }
+  }
+  refreshRide();
+  setInterval(refreshRide, 5 * 60 * 1000);
+
+  // ---- Current weather at the live position (Open-Meteo, free / no key) ----
+  let lastWx = { lat:null, lon:null, at:0 };
+  async function refreshWeather(lat, lon) {
+    // Only refetch if we've moved ~1km or it's been >10 min.
+    const moved = lastWx.lat == null ||
+      Math.abs(lat - lastWx.lat) > 0.01 || Math.abs(lon - lastWx.lon) > 0.01;
+    if (!moved && (Date.now() - lastWx.at) < 10 * 60 * 1000) return;
+    try {
+      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon +
+        '&current=temperature_2m,precipitation,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m' +
+        '&temperature_unit=celsius&wind_speed_unit=kmh';
+      const j = await (await fetch(u, { cache:'no-store' })).json();
+      const c = j.current || {};
+      const t = c.temperature_2m, p = c.precipitation, rh = c.relative_humidity_2m,
+            ws = c.wind_speed_10m, wd = c.wind_direction_10m;
+      const temp = t == null ? '—' : Math.round(t) + '°C · ' + Math.round(t*9/5+32) + '°F';
+      $('live-weather').textContent  = temp + ' ' + wxEmoji(c.weather_code);
+      $('live-precip').textContent   = p == null ? '—' : p + ' mm · ' + (p/25.4).toFixed(2) + ' in';
+      $('live-wind').textContent     = ws == null ? '—'
+        : Math.round(ws) + ' km/h · ' + Math.round(ws*0.621) + ' mph' + (wd == null ? '' : ' ' + compass(wd));
+      $('live-humidity').textContent = rh == null ? '—' : Math.round(rh) + '%';
+      lastWx = { lat, lon, at: Date.now() };
+    } catch (e) { /* keep last reading */ }
+  }
+  // Wind bearing (degrees the wind blows FROM) → 16-point compass + arrow.
+  const compass = deg => {
+    const pts = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    const arrows = ['↓','↙','↙','←','←','↖','↖','↑','↑','↗','↗','→','→','↘','↘','↓'];
+    const i = Math.round(deg / 22.5) % 16;
+    return pts[i] + ' ' + arrows[i];  // arrow points the way the wind is heading
+  };
+  // WMO weather-code → emoji (coarse buckets).
+  const wxEmoji = code => code == null ? '' :
+    code === 0 ? '☀️' : code <= 3 ? '⛅' : code <= 48 ? '🌫️' :
+    code <= 67 ? '🌧️' : code <= 77 ? '❄️' : code <= 82 ? '🌧️' :
+    code <= 86 ? '🌨️' : '⛈️';
+
+  // ---- Live position (Overland → Lambda) ----
+  const LIVE_URL = 'https://a7oxemeqgix2qeuqhukui5skie0tbycc.lambda-url.us-east-1.on.aws/';
+  const DEVICE   = 'iphone';
+  const POLL_MS  = 5000;
+
+  const meIcon = L.divIcon({ className:'me-marker', html:'<span class="me-motor">🏍️</span>', iconSize:[0,0], iconAnchor:[0,0] });
+  let meMarker = null;
+  const $ = id => document.getElementById(id);
+
+  // iOS reports -1 for speed/course when unavailable (e.g. stationary).
+  const fmtSpeed = mps => (mps == null || mps < 0) ? '—'
+    : (mps*3.6).toFixed(0) + ' km/h · ' + (mps*2.237).toFixed(0) + ' mph';
+  // Overland reports battery_level as a 0–1 fraction (older builds send 0–100).
+  const fmtBattery = v => v == null ? '—' : Math.round(v <= 1 ? v*100 : v) + '%';
+  const fmtAgo = ts => {
+    if (!ts) return '—';
+    const s = Math.max(0, (Date.now() - new Date(ts).getTime())/1000);
+    if (s < 60)   return Math.round(s) + 's ago';
+    if (s < 3600) return Math.round(s/60) + 'm ago';
+    return Math.round(s/3600) + 'h ago';
+  };
+
+  async function poll() {
+    try {
+      const r = await fetch(LIVE_URL + '?device=' + encodeURIComponent(DEVICE) + '&limit=1', { cache:'no-store' });
+      const j = await r.json();
+      const loc = (j.locations && j.locations[0]) || null;
+      if (loc && loc.lat != null && loc.lon != null) {
+        const pos = [loc.lat, loc.lon];
+        if (!meMarker) { meMarker = L.marker(pos, { icon:meIcon, zIndexOffset:1000 }).addTo(map); }
+        else { meMarker.setLatLng(pos); }
+        $('live-coords').textContent = loc.lat.toFixed(5) + ', ' + loc.lon.toFixed(5);
+        $('live-speed').textContent  = fmtSpeed(loc.speed);
+        $('live-battery').textContent = fmtBattery(loc.battery_level);
+        $('live-time').textContent   = fmtAgo(loc.timestamp);
+        $('live-status').style.background = '#2a9d8f';
+        refreshWeather(loc.lat, loc.lon);
+      } else {
+        $('live-status').style.background = '#e9c46a';  // reachable but no data yet
+      }
+    } catch (e) {
+      $('live-status').style.background = '#e63946';     // fetch failed
+    }
+  }
+  poll();
+  setInterval(poll, POLL_MS);
+</script>
+</body></html>
