@@ -3,6 +3,12 @@
     "center": [45.5100, -73.5800],
     "zoom": 12
   },
+  "tiles": {
+    "url": "https://api.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey=8f35793c21034f3e951dff0d397809cb",
+    "attribution": "Maps &copy; <a href=\"https://www.thunderforest.com/\">Thunderforest</a>, Data &copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
+    "maxZoom": 22,
+    "darken": false
+  },
   "hostel": {
     "name": "Auberge Saintlo Montréal",
     "cat": "",
