@@ -15,7 +15,7 @@ dynamodb databases, and wrote a small paragraph that I prompted Claude on how I
 wanted the very simple app to work. Let Opus 4.8 rip for about 15 minutes, and
 $5.38 worth of credits later, was able to deploy this straight to AWS. See it
 live [here](https://jbaum.dev/montreal/map/). I plan on riding this route on
-July 16, 2026 so you can follow alone.
+July 16, 2026 so you can follow along.
 
 # Claude
 
