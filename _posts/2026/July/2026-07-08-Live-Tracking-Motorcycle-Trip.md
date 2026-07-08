@@ -5,8 +5,6 @@ date: July 7, 2026
 time: 22:00 UTC-5
 ---
 
-# Preface
-
 Everything below was written, and deployed by Claude. I wanted to play with some
 dynamodb databases, and wrote a small paragraph that I prompted Claude on how I
 wanted the very simple app to work. Let Opus 4.8 rip for about 15 minutes, and
