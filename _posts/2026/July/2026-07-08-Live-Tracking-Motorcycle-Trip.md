@@ -5,6 +5,11 @@ date: July 7, 2026
 time: 22:00 UTC-5
 ---
 
+I've gotten into a habit of using Claude quite a lot. Especially for small
+PoCs. So I thought I'd give it some really simple stuff so I can have people
+track my progress on a road trip. Also a small helper for when I am there
+[here](https://jbaum.dev/montreal/places/).
+
 Everything below was written, and deployed by Claude. I wanted to play with some
 dynamodb databases, and wrote a small paragraph that I prompted Claude on how I
 wanted the very simple app to work. Let Opus 4.8 rip for about 15 minutes, and
