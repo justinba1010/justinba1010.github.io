@@ -10,13 +10,13 @@
     "darken": false
   },
   "hostel": {
-    "name": "Auberge Saintlo Montréal",
-    "cat": "",
+    "name": "M Montreal",
+    "cat": "16–19 Jul 2026 · 3 nights · 1 guest",
     "emoji": "🛏️",
-    "url": "https://www.saintlo.ca/en/hostels/montreal/",
-    "address": "1030 Rue Mackay, Montréal, QC H3G 1V3",
-    "lat": 45.4954,
-    "lon": -73.5779
+    "url": "https://www.mmontreal.com/",
+    "address": "1245 Rue Saint-André, Montreal, QC H2L 3T1",
+    "lat": 45.51603,
+    "lon": -73.55707
   },
   "restaurants": [
     {"name": "Stem Bar", "emoji": "🍷", "cat": "Wine Bar · Little Burgundy", "url": "http://stem-bar.com/", "address": "2475 Rue Notre-Dame Ouest, Montreal, QC H3J 1N6", "lat": 45.4832, "lon": -73.5750, "dishes": ["Burrata with savoury pancakes", "Hanger steak", "Cavatelli with braised lamb ragù"]},
