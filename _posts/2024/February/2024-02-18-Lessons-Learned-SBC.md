@@ -60,8 +60,7 @@ I wish I had more details and things to show, but this was towards the end of
 
 ![Register 3D]({{ site.url }}/images/2024-sbc/register_kicad.jpg) 
 
-![Register
-3D-2]({{ site.url }}/images/2024-sbc/register_kicad2.jpg)
+![Register 3D-2]({{ site.url }}/images/2024-sbc/register_kicad2.jpg)
 
 ## Lessons
 
@@ -119,8 +118,7 @@ originally designed the video output to be with a VGA port.
 
 ![VGA Schematic]({{ site.url }}/images/2024-sbc/vga_schematic.jpg)
 
-![VGA
-Board]({{ site.url }}/images/2024-sbc/vga_board.jpg)
+![VGA Board]({{ site.url }}/images/2024-sbc/vga_board.jpg)
 
 ![VGA Render]({{ site.url
 }}/images/2024-sbc/vga_3d.jpg)
